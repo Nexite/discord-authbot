@@ -4,12 +4,15 @@ import discord
 from discord import Color
 import random
 
+
 async def update_username(bot, user_info):
     if user_info and "discordId" in user_info.keys():
         guild = bot.get_guild(int(getenv("GUILD_ID", 689213562740277361)))
         user = (guild.get_member(int(user_info["discordId"])))
-        fish = ['🐟','🎣','🐠','🐡','🍣','🦑','🦐','🦈','🐬','🐳','🐋','🦞','🦀']
-        desired_nick = f"{random.choice(fish)} {user_info['name']}"
+        if not user:
+            return
+        fish = ['🐟', '🎣', '🐠', '🐡', '🍣', '🦑', '🦐', '🦈', '🐬', '🐳', '🐋', '🦞', '🦀']
+        desired_nick = f"{user_info['name']}"
         if user_info["badges"]:
             if 'displayedBadges' in user_info:
                 displayed_badges = [badge["details"]["emoji"] for badge in user_info["displayedBadges"]]
@@ -17,7 +20,8 @@ async def update_username(bot, user_info):
                 displayed_badges = [badge["details"]["emoji"] for badge in
                                     [badge_data for badge_data in user_info["badges"] if
                                      badge_data["displayed"] is True]]
-            desired_nick = f"{random.choice(fish)} {user_info['name']} {''.join(displayed_badges)}"
+            desired_nick = f"{user_info['name']} {''.join(displayed_badges)}"
+        desired_nick = f"{random.choice(fish)} {desired_nick}"
         try:
             if not user.nick == desired_nick:
                 try:
@@ -27,22 +31,22 @@ async def update_username(bot, user_info):
                     await user.edit(nick=desired_nick)
                     if user.dm_channel is None:
                         await user.create_dm()
-                    await user.dm_channel.send(
-                        f'''Hi there! I was trying to update your nickname, but it looks like your name is over 32 characters (Discord limitation).
-I have cut it down to 32 characters which looks like this.
-> `{desired_nick}`
-
-Try changing your name format or abbreviate your name at https://account.codeday.org/ if you dislike this.
-''')
+#                     await user.dm_channel.send(
+#                         f'''Hi there! I was trying to update your nickname, but it looks like your name is over 32 characters (Discord limitation).
+# I have cut it down to 32 characters which looks like this.
+# > `{desired_nick}`
+#
+# Try changing your name format or abbreviate your name at https://account.codeday.org/ if you dislike this.
+# ''')
         except discord.Forbidden:
             if user.nick != desired_nick:
                 try:
                     if user.dm_channel is None:
                         await user.create_dm()
-                    await user.dm_channel.send(f'''
-                    Hi there! I was trying to update your nickname, but it looks like you outrank me 😢
-    Would you mind setting your nickname to the following?
-    > `{desired_nick}`''')
+    #                 await user.dm_channel.send(f'''
+    #                 Hi there! I was trying to update your nickname, but it looks like you outrank me 😢
+    # Would you mind setting your nickname to the following?
+    # > `{desired_nick}`''')
                 except discord.Forbidden:
                     pass
         return f"Nickname: {desired_nick}"
